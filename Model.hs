@@ -3,13 +3,13 @@ module Model where
 
 type Key = String
 
-data Json a b = JObj Key JValue 
-               | Arr [JValue] 
-               deriving Show
+data Json = JObj Key JValue 
+            | Arr [JValue] 
+            deriving Show
 
 data JValue = I Int 
               | F Float 
               | S String
               | B Bool
-              | J [Json Key JValue]
+              | J Json
                deriving Show
