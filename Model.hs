@@ -7,8 +7,7 @@ data Json = JObj Key JValue
             | Arr [JValue] 
             deriving Show
 
-data JValue = I Int 
-              | F Float 
+data JValue = N Double
               | S String
               | B Bool
               | J Json
