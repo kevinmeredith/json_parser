@@ -20,11 +20,11 @@ parseNotQuote = satisfy (/= '"')
 --parseNumberJValue :: Parser JValue
 --parseNumberJValue = alt parseUnsignedNumber
 
---parseUnsignedInt :: Parser JValue
---parseUnsignedInt = (\x -> N (read x)) <$> (oneOrMore (satisfy isNumber))
+parsePositiveInteger :: Parser JValue
+parsePositiveInteger = fmap (\x -> N (fromIntegral x)) parseInteger 
 
---parseSignedInt :: Parser JValue
---parseSignedInt = (\x -> N (read (-x)))) <$> (parseNegativeSign *> (oneOrMore (satisfy isNumber)))
+parseNegativeInteger :: Parser JValue
+parseNegativeInteger = fmap (\x -> N (fromIntegral (-x))) $ (parseNegativeSign *> parseInteger)
 
 --parseUnsignedDecimal:: Parser JValue
 --parseUnsignedDecimal = (\x y -> N (read x)) <$> ( (oneOrMore (satisfy isNumber)) <* parseDecimalPoint *> (zeroOrMore (satisfy isNumber)) )
@@ -38,8 +38,8 @@ parseNegativeSign = satisfy (== '-')
 parseDecimalPoint :: Parser Char
 parseDecimalPoint = satisfy (== '.')
 
-parseInteger :: String -> Maybe Integer
-parseInteger = fmap (read . fst) $ runParser (oneOrMore (satisfy isNumber))
+parseInteger :: Parser Integer
+parseInteger = fmap read $ (oneOrMore (satisfy isNumber))
 
 -- TODO: overflow with `Integer`?
 type Whole   = Integer
