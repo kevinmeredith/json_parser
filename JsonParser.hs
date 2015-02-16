@@ -17,7 +17,7 @@ parseBooleanJValue :: Parser JValue
 parseBooleanJValue = fmap B parseBool
 
 parseStringJValue :: Parser JValue
-parseStringJValue = S <$> (spaces *> (char '"') *> (zeroOrMore (satisfy (const True))) <* (char '"'))
+parseStringJValue = S <$> ((char '"') *> (zeroOrMore notEndOfString) <* (char '"'))
 
 parseNumberJValue :: Parser JValue
 parseNumberJValue = alt (alt parsePositiveDecimal parseNegativeDecimal) (alt parsePositiveInteger parseNegativeInteger)
@@ -73,6 +73,16 @@ parseBool = Parser f
     f ('f':'a':'l':'s':'e':xs) = Just (False, xs)
     f _                        = Nothing
 
+--" \"foo\":\"bar\" "
+
+---- assumes that an opening quote was already parsed
+--parseStartsWithQuotes :: Parser String
+--parseStartsWithQuotes = Parser f
+--  where
+--    f ('\"':xs)  | all isSpace xs = Just ([], [])
+--    f xs         | all isSpace xs = Nothing
+--    f (x:xs)                      = Just (x, xs)
+
 -- originally I thought it was needed for -1234.3.3, but perhaps the remaining input can be parsed afterwards
 endOfString :: Parser EndOfString
 endOfString = Parser f
@@ -80,4 +90,9 @@ endOfString = Parser f
     f [] = Just (EndOfString, [])
     f _  = Nothing
 
+notEndOfString :: Parser Char
+notEndOfString = Parser f
+  where 
+    f []     = Nothing
+    f (x:xs) = Just (x, xs)
 
