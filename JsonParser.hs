@@ -16,8 +16,18 @@ parseArrayJValue = fmap Arr (zeroOrMore $ spaces *> parseJValue <* spaces <* (sa
 parseBooleanJValue :: Parser JValue
 parseBooleanJValue = fmap B parseBool
 
+-- does not handle " \" "
 parseStringJValue :: Parser JValue
-parseStringJValue = S <$> ((char '"') *> (zeroOrMore notEndOfString) <* (char '"'))
+parseStringJValue = S <$> ((char '"') *> (zeroOrMore (notChar '"')) <* (char '"'))
+
+--parseStringJValueComplete :: Parser JValue
+--parseStringJValueComplete = S <$> ((char '"') *> (alt parseEscapedQuotes (zeroOrMore (notChar '"'))) <* (char '"'))
+
+--parseEscapedQuotes :: Parser String
+--parseEscapedQuotes = Parser f
+--  where
+--    f ("\"":xs) = Just ("\"", xs)
+--    f _         = Nothing
 
 parseNumberJValue :: Parser JValue
 parseNumberJValue = alt (alt parsePositiveDecimal parseNegativeDecimal) (alt parsePositiveInteger parseNegativeInteger)
@@ -96,3 +106,5 @@ notEndOfString = Parser f
     f []     = Nothing
     f (x:xs) = Just (x, xs)
 
+notChar :: Char -> Parser Char
+notChar c = satisfy (/= c)
