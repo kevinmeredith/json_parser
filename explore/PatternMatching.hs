@@ -5,3 +5,7 @@
 g :: String -> Bool
 g ('\\':'"':_) = True
 g _ 		   = False
+
+f :: String -> [Char]
+f ('"':xs) = xs
+f _        = []

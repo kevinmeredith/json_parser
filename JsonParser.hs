@@ -16,18 +16,15 @@ parseArrayJValue = fmap Arr (zeroOrMore $ spaces *> parseJValue <* spaces <* (sa
 parseBooleanJValue :: Parser JValue
 parseBooleanJValue = fmap B parseBool
 
--- does not handle " \" "
 parseStringJValue :: Parser JValue
-parseStringJValue = S <$> ((char '"') *> (zeroOrMore (notChar '"')) <* (char '"'))
+parseStringJValue = (\x -> S (concat x)) <$> ((char '"') *> (zeroOrMore (alt parseEscapedQuotes (oneOrMore (notChar '"')))) <* (char '"'))
 
---parseStringJValueComplete :: Parser JValue
---parseStringJValueComplete = S <$> ((char '"') *> (alt parseEscapedQuotes (zeroOrMore (notChar '"'))) <* (char '"'))
-
---parseEscapedQuotes :: Parser String
---parseEscapedQuotes = Parser f
---  where
---    f ("\"":xs) = Just ("\"", xs)
---    f _         = Nothing
+-- got help from http://stackoverflow.com/a/28555403/409976
+parseEscapedQuotes :: Parser String
+parseEscapedQuotes = Parser f
+  where
+    f ('"':xs) = Just ("\"", xs)
+    f _        = Nothing
 
 parseNumberJValue :: Parser JValue
 parseNumberJValue = alt (alt parsePositiveDecimal parseNegativeDecimal) (alt parsePositiveInteger parseNegativeInteger)
@@ -108,3 +105,6 @@ notEndOfString = Parser f
 
 notChar :: Char -> Parser Char
 notChar c = satisfy (/= c)
+
+--repeatOneOrOther :: Parser [a] -> Parser [a] -> Parser [a]
+--repeatOneOrOther f g = 
