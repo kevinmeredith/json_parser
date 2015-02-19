@@ -17,14 +17,7 @@ parseBooleanJValue :: Parser JValue
 parseBooleanJValue = fmap B parseBool
 
 parseStringJValue :: Parser JValue
-parseStringJValue = (\x -> S (concat x)) <$> ((char '"') *> (zeroOrMore (alt parseEscapedQuotes (oneOrMore (notChar '"')))) <* (char '"'))
-
--- got help from http://stackoverflow.com/a/28555403/409976
-parseEscapedQuotes :: Parser String
-parseEscapedQuotes = Parser f
-  where
-    f ('"':xs) = Just ("\"", xs)
-    f _        = Nothing
+parseStringJValue = S <$> ((char '"') *> (zeroOrMore (alt (char '\\' *> char '"') (notChar '"'))) <* (char '"'))
 
 parseNumberJValue :: Parser JValue
 parseNumberJValue = alt (alt parsePositiveDecimal parseNegativeDecimal) (alt parsePositiveInteger parseNegativeInteger)
@@ -79,16 +72,6 @@ parseBool = Parser f
     f ('t':'r':'u':'e':xs) 	   = Just (True, xs)
     f ('f':'a':'l':'s':'e':xs) = Just (False, xs)
     f _                        = Nothing
-
---" \"foo\":\"bar\" "
-
----- assumes that an opening quote was already parsed
---parseStartsWithQuotes :: Parser String
---parseStartsWithQuotes = Parser f
---  where
---    f ('\"':xs)  | all isSpace xs = Just ([], [])
---    f xs         | all isSpace xs = Nothing
---    f (x:xs)                      = Just (x, xs)
 
 -- originally I thought it was needed for -1234.3.3, but perhaps the remaining input can be parsed afterwards
 endOfString :: Parser EndOfString
