@@ -6,13 +6,12 @@ import Model
 import AParser
 import Control.Applicative
 import Data.Char
-import Data.List
 
 parseJValue :: Parser JValue
 parseJValue = alt (alt parseBooleanJValue parseNumberJValue) parseStringJValue 
 
---parseArrayJValue :: Parser Json
---parseArrayJValue = fmap Arr $ repsep parseJValue (char ',') ','
+parseArrayJValue :: Parser Json
+parseArrayJValue = fmap Arr $ repsep parseJValue (char ',') 
 
 parseBooleanJValue :: Parser JValue
 parseBooleanJValue = fmap B parseBool
@@ -29,8 +28,8 @@ parsePositiveInteger = fmap (\x -> N (fromIntegral x)) parseInteger
 parseNegativeInteger :: Parser JValue
 parseNegativeInteger = fmap (\x -> N (fromIntegral (-x))) $ (parseNegativeSign *> parseInteger)
 
-repsep :: Parser a -> Parser a -> a -> Parser [a]
-repsep p sep sepLit = fmap (intersperse sepLit) $ (\xs y -> xs ++ [y]) <$> (oneOrMore (p <* spaces <* sep)) <*> p
+repsep :: Parser a -> Parser b -> Parser [a]
+repsep p sep = (\xs y -> xs ++ [y]) <$> (oneOrMore (p <* spaces <* sep)) <*> p
 
 -- examples of decimal points
 -- 0.
@@ -90,6 +89,3 @@ notEndOfString = Parser f
 
 notChar :: Char -> Parser Char
 notChar c = satisfy (/= c)
-
---repeatOneOrOther :: Parser [a] -> Parser [a] -> Parser [a]
---repeatOneOrOther f g = 
