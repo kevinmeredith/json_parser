@@ -26,8 +26,14 @@ parseJValue = alt
 parseArrayJValue :: Parser JValue
 parseArrayJValue = fmap (Array) parseArray
 
+-- problem:
+-- *JsonParser> runParser parseArray "[[1],[2]]"
+--   Nothing
+-- *JsonParser> runParser parseArray "[[1,3],[2,4]]"
+--   Just (Arr [Array (Arr [Num 1.0,Num 3.0]),Array (Arr [Num 2.0,Num 4.0])],"")
 parseArray :: Parser JArr
-parseArray = fmap Arr $ (char '[' *> spaces *> (repsep parseJValue (char ',')) <* spaces <* char ']')
+parseArray = fmap Arr $ 
+                 (char '[' *> spaces *> (alt (rep1sep parseJValue (char ',')) ((: []) <$> parseSingleJValue)) <* spaces <* char ']')
 
 parseBooleanJValue :: Parser JValue
 parseBooleanJValue = fmap B parseBool
@@ -47,8 +53,18 @@ parsePositiveInteger = fmap (\x -> Num (fromIntegral x)) parseInteger
 parseNegativeInteger :: Parser JValue
 parseNegativeInteger = fmap (\x -> Num (fromIntegral (-x))) $ (parseNegativeSign *> parseInteger)
 
+parseSingleJValue :: Parser JValue
+parseSingleJValue = alt 
+                     (alt parseBooleanJValue parseNumberJValue) 
+                     (alt parseNull parseStringJValue)
+
+-- 0 or more repetitions
 repsep :: Parser a -> Parser b -> Parser [a]
-repsep p sep = (\xs y -> xs ++ [y]) <$> (oneOrMore (p <* spaces <* sep <* spaces)) <*> p
+repsep p sep = alt (rep1sep p sep) ((: []) <$> p)
+
+-- 1 or more repetitions
+rep1sep :: Parser a -> Parser b -> Parser [a]
+rep1sep p sep = (\xs y -> xs ++ [y]) <$> (oneOrMore (p <* spaces <* sep <* spaces)) <*> p
 
 -- examples of decimal points
 -- 0.
