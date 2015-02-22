@@ -6,9 +6,10 @@ import Model
 import AParser
 import Control.Applicative
 import Data.Char
+import Data.Set as Set
 
 --parseJson :: Parser Json
---parseJson = alt parseJObj parseArrayJValue
+--parseJson = alt (JObject <$> parseJObj) parseArrayJValue
 
 parseJObj :: Parser JObj 
 parseJObj = (\k v -> JObj k v) <$> 
@@ -26,11 +27,6 @@ parseJValue = alt
 parseArrayJValue :: Parser JValue
 parseArrayJValue = fmap (Array) parseArray
 
--- problem:
--- *JsonParser> runParser parseArray "[[1],[2]]"
---   Nothing
--- *JsonParser> runParser parseArray "[[1,3],[2,4]]"
---   Just (Arr [Array (Arr [Num 1.0,Num 3.0]),Array (Arr [Num 2.0,Num 4.0])],"")
 parseArray :: Parser JArr
 parseArray = fmap Arr $ 
                  (char '[' *> spaces *> (alt (rep1sep parseJValue (char ',')) ((: []) <$> parseSingleJValue)) <* spaces <* char ']')
@@ -100,7 +96,9 @@ type Decimal = Integer
 readWholeAndDecimal :: Whole -> Decimal -> Double
 readWholeAndDecimal w d = read $ (show w) ++ "." ++ (show d)
 
-data EndOfString = EndOfString deriving Show
+convertArrToSet :: JValue -> (Set JValue)
+convertArrToSet (Array (Arr xs))  = Prelude.foldr (\elem acc -> Set.insert elem acc) Set.empty xs
+convertArrToSet x                 = Set.singleton x
 
 parseBool :: Parser Bool
 parseBool = Parser f
@@ -108,19 +106,6 @@ parseBool = Parser f
     f ('t':'r':'u':'e':xs) 	   = Just (True, xs)
     f ('f':'a':'l':'s':'e':xs) = Just (False, xs)
     f _                        = Nothing
-
--- originally I thought it was needed for -1234.3.3, but perhaps the remaining input can be parsed afterwards
-endOfString :: Parser EndOfString
-endOfString = Parser f
-  where
-    f [] = Just (EndOfString, [])
-    f _  = Nothing
-
-notEndOfString :: Parser Char
-notEndOfString = Parser f
-  where 
-    f []     = Nothing
-    f (x:xs) = Just (x, xs)
 
 notChar :: Char -> Parser Char
 notChar c = satisfy (/= c)

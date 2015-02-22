@@ -1,14 +1,15 @@
 {-# OPTIONS_GHC -Wall #-}
 module Model where
 
-import Data.Set 
+import Data.Set as Set
 
 -- http://json.org/
 
 type Key = String
 
-data Json = JObject (Set JObj)
+data Json = JObject Key (Set JValue)
             | JArray JArr
+            deriving Show
 
 data JObj = JObj Key JValue
             deriving Show
