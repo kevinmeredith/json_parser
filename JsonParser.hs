@@ -8,13 +8,16 @@ import Control.Applicative
 import Data.Char
 import Data.Set as Set
 
---parseJson :: Parser Json
---parseJson = alt (JObject <$> parseJObj) parseArrayJValue
+parseJson :: Parser Json
+parseJson = alt (jObjToJson <$> parseJObj) (JArray <$> parseArray)
 
 parseJObj :: Parser JObj 
 parseJObj = (\k v -> JObj k v) <$> 
-                      (spaces *> (char '{') *> parseJObjKey <* spaces <* (char ':')) <*> 
+                      (spaces *> (char '{') *> spaces *> parseJObjKey <* spaces <* (char ':')) <*> 
                       (spaces *> parseJValue <* spaces <* (char '}'))
+
+jObjToJson :: JObj -> Json
+jObjToJson (JObj k v) = JObject k (convertArrToSet v)
 
 parseJObjKey :: Parser Key
 parseJObjKey = (char '"') *> oneOrMore (notChar '"') <* char ('"')
@@ -97,7 +100,7 @@ readWholeAndDecimal :: Whole -> Decimal -> Double
 readWholeAndDecimal w d = read $ (show w) ++ "." ++ (show d)
 
 convertArrToSet :: JValue -> (Set JValue)
-convertArrToSet (Array (Arr xs))  = Prelude.foldr (\elem acc -> Set.insert elem acc) Set.empty xs
+convertArrToSet (Array (Arr xs))  = Prelude.foldr (\x acc -> Set.insert x acc) Set.empty xs
 convertArrToSet x                 = Set.singleton x
 
 parseBool :: Parser Bool

@@ -12,11 +12,11 @@ data Json = JObject Key (Set JValue)
             deriving Show
 
 data JObj = JObj Key JValue
-            deriving Show
+            deriving (Show, Eq, Ord)
 
-data JArr = Arr [JValue] deriving Show
+data JArr = Arr [JValue] deriving (Show, Eq, Ord)
 
-data Null = Null deriving Show
+data Null = Null deriving (Show, Eq, Ord)
 
 data JValue = Num Double
               | S String
@@ -24,4 +24,4 @@ data JValue = Num Double
               | J JObj
               | Array JArr
               | N Null
-               deriving Show
+               deriving (Show, Eq, Ord)
