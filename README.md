@@ -9,8 +9,7 @@ Note that the newtype, ```Parser```, as well as some of the other code within **
 
 # How to Run
 
-<code><pre>
-	
+```
 Prelude> :l JsonParser.hs 
 [1 of 4] Compiling AParser          ( AParser.hs, interpreted )
 [2 of 4] Compiling Model            ( Model.hs, interpreted )
@@ -28,7 +27,7 @@ Just (JObject "foo" (fromList [S "bar",B True,N Null])," ")
 
 *JsonParser> runParser parseJson " { \"foo\" : whoops "
 Nothing
-</pre></code>
+```
 
 # TODO
 
