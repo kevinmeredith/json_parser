@@ -27,6 +27,10 @@ Just (JObject "foo" (fromList [S "bar",B True,N Null])," ")
 
 *JsonParser> runParser parseJson " { \"foo\" : whoops "
 Nothing
+
+*JsonParser> runParser parseJson " { \"foo\" : [1,2,\"\\\" with escaped quote \\\" \"] } "
+Just (JObject "foo" (fromList [Num 1.0,Num 2.0,S "\" with escaped quote \" "])," ")
+
 ```
 
 # TODO
